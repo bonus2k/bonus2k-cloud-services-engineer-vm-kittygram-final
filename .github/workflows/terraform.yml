@@ -13,6 +13,10 @@ on:
           - apply
           - destroy
 
+permissions:
+  contents: write
+
+
 jobs:
   terraform_plan:
     runs-on: ubuntu-latest
@@ -46,7 +50,7 @@ jobs:
           SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
           TF_VAR_cloud_id: ${{ secrets.YC_CLOUD_ID }}
           TF_VAR_folder_id: ${{ secrets.YC_FOLDER_ID }}
-          TF_VAR_username: ${{ secrets.YC_VM_USER}}
+          TF_VAR_username: ${{ vars.VM_USER}}
           TF_VAR_ssh_key: ${{ secrets.VM_PUB_SSH_KEY}}
 
   terraform_destroy:
@@ -75,13 +79,13 @@ jobs:
 
       - name: Run Destroy
         working-directory: ./infra
-        run: terraform destroy
+        run: terraform destroy -auto-approve
         env:
           ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
           SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
           TF_VAR_cloud_id: ${{ secrets.YC_CLOUD_ID }}
           TF_VAR_folder_id: ${{ secrets.YC_FOLDER_ID }}
-          TF_VAR_username: ${{ secrets.YC_VM_USER}}
+          TF_VAR_username: ${{ vars.VM_USER}}
           TF_VAR_ssh_key: ${{ secrets.VM_PUB_SSH_KEY}}
 
   terraform_apply:
@@ -95,6 +99,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.8.3
+          terraform_wrapper: false
 
       - name: Set up Yandex Cloud service account key
         working-directory: ./infra
@@ -110,33 +115,20 @@ jobs:
 
       - name: Run Apply
         working-directory: ./infra
-        run: terraform apply -auto-approve
         env:
           ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
           SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
           TF_VAR_cloud_id: ${{ secrets.YC_CLOUD_ID }}
           TF_VAR_folder_id: ${{ secrets.YC_FOLDER_ID }}
-          TF_VAR_username: ${{ secrets.YC_VM_USER}}
+          TF_VAR_username: ${{ vars.VM_USER}}
           TF_VAR_ssh_key: ${{ secrets.VM_PUB_SSH_KEY}}
-      - name: Terraform Apply
-        id: terraform
         run: |
           terraform apply -auto-approve
-          echo "VM_ADDRESS=$(terraform output -raw external_ip)" >> $GITHUB_ENV
 
-      - name: Save VM address IP to GitHub Secrets
-        env:
-          VM_ADDRESS: ${{ env.VM_ADDRESS }}
+      - name: Save External IP
+        working-directory: ./infra
         run: |
-          echo "Saving external IP ($EXTERNAL_IP) to GitHub Secrets..."
-          curl -L -X POST \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/actions/variables \
-            -d '{
-              "name": "VM_ADDRESS",
-              "value": "'"$VM_ADDRESS"'"
-            }'
+          echo "VM_ADDRESS=$(terraform output -raw external_ip)" >> $GITHUB_ENV
 
       - name: Notify on success
         if: success()
@@ -146,7 +138,7 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
             🟢 *Created VM for Kittygram completed successfully!* 🎉
-            *Server:* `${{ vars.VM_ADDRESS }}`
+            *Server:* ${{ env.VM_ADDRESS }}
 
       - name: Run Deploy Workflow
         run: |
@@ -155,7 +147,3 @@ jobs:
           -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           https://api.github.com/repos/${{ github.repository }}/dispatches \
           -d '{"event_type": "terraform-workflow"}'
-      
-
-
-      
