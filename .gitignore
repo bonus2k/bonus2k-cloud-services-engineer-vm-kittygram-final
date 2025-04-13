@@ -1,0 +1,9 @@
+
+.DS_Store
+/backend/.venv/
+/.env
+/.idea/
+/infra/.terraform/
+/infra/.terraform.lock.hcl
+/infra/terraform.tfvars
+/infra/key.json

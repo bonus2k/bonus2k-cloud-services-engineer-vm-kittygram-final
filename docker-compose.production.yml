@@ -1,0 +1,50 @@
+volumes:
+  pg_data:
+  static:
+  media:
+
+services:
+  postgres:
+    image: postgres:13-alpine
+    env_file:
+      - .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -h localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+
+  backend:
+    image: ${BACKEND_IMAGE}
+    env_file:
+      - .env
+    environment:
+      POSTGRES_URL: >-
+        postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    volumes:
+      - media:/media
+      - static:/static
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    volumes:
+      - static:/static
+
+  gateway:
+    image: ${GATEWAY_IMAGE}
+    ports:
+      - "80:80"
+    volumes:
+      - static:/static
+      - media:/media
+    depends_on:
+      - backend
+

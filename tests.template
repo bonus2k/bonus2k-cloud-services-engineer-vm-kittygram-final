@@ -1,0 +1,3 @@
+repo_owner: bonus2k
+kittygram_domain: http://${VM_ADDRESS}
+dockerhub_username: bonus2k

@@ -1,0 +1,6 @@
+.venv/
+venv/
+README.md
+.git
+.env
+db.sqlite3
