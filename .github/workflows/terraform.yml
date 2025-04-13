@@ -35,15 +35,19 @@ jobs:
         working-directory: ./infra
         run: terraform init -backend-config="access_key=$ACCESS_KEY" -backend-config="secret_key=$SECRET_KEY"
         env:
-          ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
+          SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
 
       - name: Run Plan
         working-directory: ./infra
         run: terraform plan
         env:
-          ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
+          SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
+          TF_VAR_cloud_id: ${{ secrets.YC_CLOUD_ID }}
+          TF_VAR_folder_id: ${{ secrets.YC_FOLDER_ID }}
+          TF_VAR_username: ${{ secrets.YC_VM_USER}}
+          TF_VAR_ssh_key: ${{ secrets.VM_PUB_SSH_KEY}}
 
   terraform_destroy:
     runs-on: ubuntu-latest
@@ -66,15 +70,19 @@ jobs:
         working-directory: ./infra
         run: terraform init -backend-config="access_key=$ACCESS_KEY" -backend-config="secret_key=$SECRET_KEY"
         env:
-          ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
+          SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
 
       - name: Run Destroy
         working-directory: ./infra
         run: terraform destroy
         env:
-          ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
+          SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
+          TF_VAR_cloud_id: ${{ secrets.YC_CLOUD_ID }}
+          TF_VAR_folder_id: ${{ secrets.YC_FOLDER_ID }}
+          TF_VAR_username: ${{ secrets.YC_VM_USER}}
+          TF_VAR_ssh_key: ${{ secrets.VM_PUB_SSH_KEY}}
 
   terraform_apply:
     runs-on: ubuntu-latest
@@ -97,8 +105,8 @@ jobs:
         working-directory: ./infra
         run: terraform init -backend-config="access_key=$ACCESS_KEY" -backend-config="secret_key=$SECRET_KEY"
         env:
-          ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
+          SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
 
       - name: Run Apply
         working-directory: ./infra
