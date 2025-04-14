@@ -193,10 +193,7 @@ jobs:
           cp .github/workflows/build.yml kittygram_workflow.yml
           cat .github/workflows/terraform.yml >> kittygram_workflow.yml
           cat .github/workflows/deploy.yml >> kittygram_workflow.yml
-          cat tests.template
-          echo $VM_ADDRESS
           VM_ADDRESS=$VM_ADDRESS envsubst < tests.template > tests.yml
-          cat tests.yml
           git add kittygram_workflow.yml tests.yml
           git commit -m "Added kittygram_workflow.yml after successful deploy"
 
